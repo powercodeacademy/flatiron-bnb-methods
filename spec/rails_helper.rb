@@ -1,76 +1,65 @@
-ENV["RAILS_ENV"] ||= 'test'
-require File.expand_path("../../config/environment", __FILE__)
+# This file is copied to spec/ when you run 'rails generate rspec:install'
+require 'spec_helper'
+ENV['RAILS_ENV'] ||= 'test'
+require_relative '../config/environment'
+# Prevent database truncation if the environment is production
+abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
+# Add additional requires below this line. Rails is not loaded until this point!
 
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+# Requires supporting ruby files with custom matchers and macros, etc, in
+# spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
+# run as spec files by default. This means that files in spec/support that end
+# in _spec.rb will both be required and run as specs, causing the specs to be
+# run twice. It is recommended that you do not name files matching this glob to
+# end with _spec.rb. You can configure this pattern with the --pattern
+# option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
+#
+# The following line is provided for convenience purposes. It has the downside
+# of increasing the boot-up time by auto-requiring all files in the support
+# directory. Alternatively, in the individual `*_spec.rb` files, manually
+# require only the support files necessary.
+#
+# Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
 
-ActiveRecord::Migration.maintain_test_schema!
-
-RSpec.configure do |config|
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
-  config.use_transactional_fixtures = true
-  config.infer_spec_type_from_file_location!
-  DatabaseCleaner.strategy = :truncation
-  config.after(:all) do
-    DatabaseCleaner.clean
-  end
-  config.before(:each) do
-    cities = City.create([{ name: 'NYC' }, { name: 'San Francisco' }])
-
-    @nabe1 = Neighborhood.create(name: 'Fi Di', city_id: City.first.id)
-    @nabe2 = Neighborhood.create(name: 'Green Point', city_id: City.first.id)
-    @nabe3 = Neighborhood.create(name: 'Brighton Beach', city_id: City.first.id)
-    @nabe4 = Neighborhood.create(name: 'Pacific Heights', city_id: City.last.id)
-    @nabe5 = Neighborhood.create(name: 'Mission District', city_id: City.last.id)
-
-    @amanda = User.create(name: "Amanda")
-    @katie = User.create(name: "Katie")
-    @arel = User.create(name: "Arel")
-    @logan = User.create(name: "Logan")
-    @tristan = User.create(name: "Tristan")
-    @avi = User.create(name: "Avi")
-
-    @listing1 = Listing.create(address: '123 Main Street', listing_type: "private room", title: "Beautiful Apartment on Main Street", description: "My apartment is great. there's a bedroom. close to subway....blah blah", price: 50.00, neighborhood_id: @nabe1.id, host_id: User.first.id)
-    @listing2 = Listing.create(address: '6 Maple Street', listing_type: "shared room", title: "Shared room in apartment", description: "shared a room with me because I'm poor", price: 15.00, neighborhood_id: @nabe1.id, host_id: @katie.id)
-    @listing3 = Listing.create(address: '44 Ridge Lane', listing_type: "whole house", title: "Beautiful Home on Mountain", description: "Whole house for rent on mountain. Many bedrooms.", price: 200.00, neighborhood_id: @nabe3.id, host_id: @arel.id)
-    @listing4 = Listing.create(address: '4782 Yaya Lane', listing_type: "private room", title: "Beautiful Room in awesome house", description: "Art collective hosue.", price: 400.00, neighborhood_id: @nabe4.id, host_id: @arel.id)
-
-    @reservation1 = Reservation.create(checkin: '2014-04-25', checkout: '2014-04-30', listing_id: @listing1.id, guest_id: @logan.id, :status => "accepted")
-    @reservation2 = Reservation.create(checkin: '2014-03-10', checkout: '2014-03-25', listing_id: @listing2.id, guest_id: @tristan.id, :status => "accepted")
-    @reservation3 = Reservation.create(checkin: '2014-06-02', checkout: '2014-06-30', listing_id: @listing4.id, guest_id: @avi.id, :status => "accepted")
-    @reservation4 = Reservation.create(checkin: '2014-05-02', checkout: '2014-05-08', listing_id: @listing1.id, guest_id: @tristan.id, :status => "accepted")
-    @reservation5 = Reservation.create(checkin: '2014-05-10', checkout: '2014-05-15', listing_id: @listing1.id, guest_id: @logan.id, :status => "accepted")
-
-    @review1 = Review.create(description: "This place was great!", rating: 5, guest_id: @logan.id, reservation_id: Reservation.first.id)
-    @review2 = Review.create(description: "Great place, close to subway!", rating: 4, guest_id: @tristan.id, reservation_id: Reservation.first.id)
-    @review3 = Review.create(description: "Meh, the host I shared a room with snored.", rating: 3, guest_id: @avi.id, reservation_id: Reservation.last.id)
-  end
+# Checks for pending migrations and applies them before tests are run.
+# If you are not using ActiveRecord, you can remove these lines.
+begin
+  ActiveRecord::Migration.maintain_test_schema!
+rescue ActiveRecord::PendingMigrationError => e
+  abort e.to_s.strip
 end
+RSpec.configure do |config|
+  # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
+  config.fixture_paths = [
+    Rails.root.join('spec/fixtures')
+  ]
 
-def make_denver
-  denver = City.create(:name => "Denver")
-  lakewood = Neighborhood.create(name: 'Lakewood', city_id: denver.id)
-  listing = Listing.create(
-    address: '9300 W. Mountain Ave.',
-    listing_type: "private room",
-    title: "pretty cabin outside of the city",
-    description: "My cabin is great. I have a coffeemaker",
-    price: 20.00,
-    neighborhood_id: lakewood.id,
-    host_id: User.first.id
-  )
-  checkin_day = 1
-  6.times do |i|
-    guest_id = i + 1
-    if guest_id != listing.host.id
-      Reservation.create(
-        checkin: "2014-08-#{checkin_day}",
-        checkout: "2014-08-#{checkin_day + 3}",
-        listing_id: listing.id,
-        guest_id: "#{guest_id}",
-        status: "accepted"
-      )
-      checkin_day += 5
-    end
-  end
+  # If you're not using ActiveRecord, or you'd prefer not to run each of your
+  # examples within a transaction, remove the following line or assign false
+  # instead of true.
+  config.use_transactional_fixtures = true
+
+  # You can uncomment this line to turn off ActiveRecord support entirely.
+  # config.use_active_record = false
+
+  # RSpec Rails can automatically mix in different behaviours to your tests
+  # based on their file location, for example enabling you to call `get` and
+  # `post` in specs under `spec/controllers`.
+  #
+  # You can disable this behaviour by removing the line below, and instead
+  # explicitly tag your specs with their type, e.g.:
+  #
+  #     RSpec.describe UsersController, type: :controller do
+  #       # ...
+  #     end
+  #
+  # The different available types are documented in the features, such as in
+  # https://rspec.info/features/6-0/rspec-rails
+  config.infer_spec_type_from_file_location!
+
+  # Filter lines from Rails gems in backtraces.
+  config.filter_rails_from_backtrace!
+  # arbitrary gems may also be filtered via:
+  # config.filter_gems_from_backtrace("gem name")
 end

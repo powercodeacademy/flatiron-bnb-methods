@@ -36,8 +36,37 @@ jspm_packages
 /.bundle
 
 # Ignore the default SQLite database.
-/db/*.sqlite3
+/db/*.sqlite3*
 /db/*.sqlite3-journal
+
+# Rails logs, temp, and credentials
+log/
+tmp/
+/config/master.key
+/config/credentials.yml.enc
+.byebug_history
+.env
+.env.*
+/public/assets
+/storage
+/coverage
+.yardoc
+.rspec_status
+.rubocop-rails_cache/
+.rubocop_cache/
+.solargraph.yml
+.vscode/
+.idea/
+.sass-cache/
+.bundle/
+.cache/
+.spring/
+.pry_history
+.simplecov
+.toot
+.yardoc
+.ruby-version
+.ruby-gemset
 
 # Ignore all logfiles and tempfiles.
 /log/*
