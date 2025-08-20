@@ -145,9 +145,9 @@ RSpec.configure do |config|
   config.before(:each) do
     # Cities & neighborhoods
     @nyc ||= City.find_by(name: 'NYC')
-    @nabe1 ||= Neighborhood.find_by(name: 'Williamsburg')
-    @nabe2 ||= Neighborhood.find_by(name: 'Bushwick')
-    @nabe3 ||= Neighborhood.find_by(name: 'Brighton Beach')
+    @nabe1 ||= Neighborhood.find_by(name: 'Williamsburg', city: @nyc)
+    @nabe2 ||= Neighborhood.find_by(name: 'Bushwick', city: @nyc)
+    @nabe3 ||= Neighborhood.find_by(name: 'Brighton Beach', city: @nyc)
 
     # Users
     @katie   ||= User.find_by(name: 'Katie')
